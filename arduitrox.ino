@@ -73,7 +73,7 @@ float pour;
 
 /**
  * Calculate MOD (Maximum Operating Depth) of the mix for a given PPo2
- * 
+ *
  * @param float Oxygen percentage in the mix
  * @param float PPo2
  * @return float Maximum Operating Depth
@@ -88,176 +88,165 @@ float calc_max_operating_depth (float percentage, float ppo2 = 1.4) {
  *
  * @return int keyID
  */
-int keypad_get_key()
-{
-    int adc_key_in = analogRead(0);
-    if (adc_key_in > 1000) return keyNONE; // exit fast
-    
-    if (adc_key_in < 50)   return keyRIGHT;  
-    if (adc_key_in < 250)  return keyUP; 
-    if (adc_key_in < 450)  return keyDOWN; 
-    if (adc_key_in < 650)  return keyLEFT; 
-    if (adc_key_in < 850)  return keySELECT;  
+int keypad_get_key() {
+  int adc_key_in = analogRead(0);
+  if (adc_key_in > 1000) return keyNONE; // exit fast
 
-    return keyNONE;
+  if (adc_key_in < 50)   return keyRIGHT;
+  if (adc_key_in < 250)  return keyUP;
+  if (adc_key_in < 450)  return keyDOWN;
+  if (adc_key_in < 650)  return keyLEFT;
+  if (adc_key_in < 850)  return keySELECT;
+
+  return keyNONE;
 }
 
 
 
-void setup(void)
-{
-        Serial.begin(9600);	
-	ads.setGain(GAIN_SIXTEEN); // 16x GAIN 1 bit = 0.0078125mV
+void setup(void) {
+  Serial.begin(9600);
+  ads.setGain(GAIN_SIXTEEN); // 16x GAIN 1 bit = 0.0078125mV
 
-	ads.begin();
-	lcd.begin(16, 2);
-	lcd.clear();
-	lcd.print(PROGRAM_NAME);
-	lcd.setCursor(0, 1);
-	lcd.print("");
-	delay(3000);
-	//oldRA = 0;
+  ads.begin();
+  lcd.begin(16, 2);
+  lcd.clear();
+  lcd.print(PROGRAM_NAME);
+  lcd.setCursor(0, 1);
+  lcd.print("");
+  delay(3000);
+  //oldRA = 0;
 }
 
 
-void loop(void)
-{
-	int16_t adc0;
-	oldRA = RA.getAverage();
-	adc0 = ads.readADC_Differential_0_1();
-	RA.addValue(adc0);
-	cnt += 1;
-	sig = (RA.getAverage() - oldRA) / oldRA;
-	sig1 = abs(sig);
+void loop(void) {
+  int16_t adc0;
+  oldRA = RA.getAverage();
+  adc0 = ads.readADC_Differential_0_1();
+  RA.addValue(adc0);
+  cnt += 1;
+  sig = (RA.getAverage() - oldRA) / oldRA;
+  sig1 = abs(sig);
 
-        lcd_key = keypad_get_key();
- 
-	if ( lcd_key != keyNONE )
-	{
-		opmode = MODE_CALIBRATION_MANU;
-		samples = 0;
-	}
+  lcd_key = keypad_get_key();
 
-	switch ( opmode )
-	{
-		case MODE_CALIBRATION_AUTO:
-			if ( sig1 < 0.0002 )
-			{
-				samples += 1;
-			}
-	                lcd.setCursor(0, 0);
-	                lcd.print("CALIBRATION AUTO");
+  if ( lcd_key != keyNONE ) {
+    opmode = MODE_CALIBRATION_MANU;
+    samples = 0;
+  }
 
-			lcd.setCursor(0, 1);
-                        lcd.print("%02: ");
-			lcd.print(calibgas, 1);
-			
-			pour = samples / 5;
-                        lcd.print(" | ");
-			lcd.print(pour, 0);
-			lcd.print("% ");
+  switch ( opmode ) {
+    case MODE_CALIBRATION_AUTO:
+      if ( sig1 < 0.0002 ) {
+        samples += 1;
+      }
+      lcd.setCursor(0, 0);
+      lcd.print("CALIBRATION AUTO");
+
+      lcd.setCursor(0, 1);
+      lcd.print("%02: ");
+      lcd.print(calibgas, 1);
+
+      pour = samples / 5;
+      lcd.print(" | ");
+      lcd.print(pour, 0);
+      lcd.print("% ");
 /*
-			if ( (RA.getAverage()*GAIN) < 0.02)
-			{
-				// No data received, giving up :'(
-				lcd.setCursor(0, 0);
-				lcd.print("SENSOR FAILURE !");
-				for(;;)
-					;
-			}
+      if ( (RA.getAverage()*GAIN) < 0.02)
+      {
+        // No data received, giving up :'(
+        lcd.setCursor(0, 0);
+        lcd.print("SENSOR FAILURE !");
+        for(;;)
+          ;
+      }
 */
-			Serial.print("CAL,");
-			Serial.print(cnt);
-			Serial.print(",");
-			Serial.print(RA.getAverage()*GAIN, 4);
-			Serial.print(",");
-			Serial.println(calibgas);
+      Serial.print("CAL,");
+      Serial.print(cnt);
+      Serial.print(",");
+      Serial.print(RA.getAverage()*GAIN, 4);
+      Serial.print(",");
+      Serial.println(calibgas);
 
-			if ( samples == CALIBRATION_NEEDED_SAMPLES )
-			{
-				samples = 0;
-				opmode = MODE_READ;
-				lcd.clear();
-				lcd.print("CALIBRATION OK");
-				delay(3000);
-				relpourc = 100 * calibgas / RA.getAverage();
-			}
-			break;
-
-
-		case MODE_CALIBRATION_MANU:
-			lcd.setCursor(0, 0);
-			lcd.print("CALIBRATION MANU");
-			lcd.setCursor(0, 1);
-			lcd.print("%O2 REF: ");
-			lcd.setCursor(9, 1);
-			lcd.print(calibgas, 1);
-			lcd.print("         ");
-                        
-                        switch ( lcd_key ) {
-                          case keyUP:
-                            calibgas = (calibgas < 99) ? calibgas+1 : calibgas;
-                            delay(200);
-                          break;
-                        
-                          case keyRIGHT:
-                            calibgas = (calibgas < 100) ? calibgas+0.5 : calibgas;
-                            delay(200);
-                          break;
-                        
-                          case keyDOWN:
-                            calibgas = (calibgas > 1) ? calibgas-1 : calibgas;
-                            delay(200);
-                          break;
-                        
-                          case keyLEFT:
-                            calibgas = (calibgas > 0.5) ? calibgas-0.5 : calibgas;
-                            delay(200);
-                          break;
-                    
-                          case keySELECT: // Not sure about this one, should be validated when sensor received
-                            opmode = MODE_CALIBRATION_AUTO;
-                            delay(200);
-                          break;      
-                        }
-                        
-                        
-			break;
+      if ( samples == CALIBRATION_NEEDED_SAMPLES ) {
+        samples = 0;
+        opmode = MODE_READ;
+        lcd.clear();
+        lcd.print("CALIBRATION OK");
+        delay(3000);
+        relpourc = 100 * calibgas / RA.getAverage();
+      }
+      break;
 
 
-		case MODE_READ:
-			lcd.setCursor(0, 0);
-			lcd.print("%O2: ");
-			pour = RA.getAverage() * relpourc / 100;
-			lcd.print(pour, 1);
-			
-			if (sig1 < 0.0002)
-			{
-                          lcd.print("   ");
-                          lcd.print("====");
-			}
+    case MODE_CALIBRATION_MANU:
+      lcd.setCursor(0, 0);
+      lcd.print("CALIBRATION MANU");
+      lcd.setCursor(0, 1);
+      lcd.print("%O2 REF: ");
+      lcd.setCursor(9, 1);
+      lcd.print(calibgas, 1);
+      lcd.print("         ");
+
+      switch ( lcd_key ) {
+        case keyUP:
+          calibgas = (calibgas < 99) ? calibgas+1 : calibgas;
+          delay(200);
+          break;
+
+        case keyRIGHT:
+          calibgas = (calibgas < 100) ? calibgas+0.5 : calibgas;
+          delay(200);
+          break;
+
+        case keyDOWN:
+          calibgas = (calibgas > 1) ? calibgas-1 : calibgas;
+          delay(200);
+          break;
+
+        case keyLEFT:
+          calibgas = (calibgas > 0.5) ? calibgas-0.5 : calibgas;
+          delay(200);
+          break;
+
+        case keySELECT: // Not sure about this one, should be validated when sensor received
+          opmode = MODE_CALIBRATION_AUTO;
+          delay(200);
+          break;
+      }
+
+      break;
 
 
-			lcd.setCursor(0, 1);
-			lcd.print("MOD: ");
-                        lcd.print(calc_max_operating_depth(pour, 1.4), 1);
-                        lcd.print("m ");
-                        
-                        lcd.print(calc_max_operating_depth(pour, 1.6), 1);
-                        lcd.print("m ");
+    case MODE_READ:
+      lcd.setCursor(0, 0);
+      lcd.print("%O2: ");
+      pour = RA.getAverage() * relpourc / 100;
+      lcd.print(pour, 1);
 
+      if (sig1 < 0.0002) {
+        lcd.print("    ");
+        lcd.print("====");
+      }
+
+      lcd.setCursor(0, 1);
+      lcd.print("MOD: ");
+      lcd.print(calc_max_operating_depth(pour, 1.4), 1);
+      lcd.print("m ");
+
+      lcd.print(calc_max_operating_depth(pour, 1.6), 1);
+      lcd.print("m ");
 
 /*
-			Serial.print("MES,");
-			Serial.print(cnt);
-			Serial.print(",");
-			Serial.print(RA.getAverage()*GAIN, 4);
-			Serial.print(",");
-			Serial.println(pour, 2);
+      Serial.print("MES,");
+      Serial.print(cnt);
+      Serial.print(",");
+      Serial.print(RA.getAverage()*GAIN, 4);
+      Serial.print(",");
+      Serial.println(pour, 2);
 */
-			delay(200);
-			break;
-	}
+      delay(200);
+      break;
+  }
 }
 
 
