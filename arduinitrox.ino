@@ -32,7 +32,8 @@
 /** Define some constants **/
 
 // Program name
-const char PROGRAM_NAME[] = "ArduiNitrox v0.1";
+#define PROGRAM_NAME "ArduiNitrox v0.1"
+#define OWNER_MSG "Owner : Alex D."
 
 // Operating modes
 #define MODE_CALIBRATION_AUTO 0
@@ -115,9 +116,8 @@ void setup(void) {
   lcd.clear();
   lcd.print(PROGRAM_NAME);
   lcd.setCursor(0, 1);
-  lcd.print("");
-  delay(3000);
-  //oldRA = 0;
+  lcd.print(OWNER_MSG);
+  delay(5000);
 }
 
 
