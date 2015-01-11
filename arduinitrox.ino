@@ -104,7 +104,10 @@ int keypad_get_key() {
 
 
 void setup(void) {
+  #ifdef __DEBUG__
   Serial.begin(9600);
+  #endif
+
   ads.setGain(GAIN_SIXTEEN); // 16x GAIN 1 bit = 0.0078125mV
 
   ads.begin();
@@ -160,12 +163,14 @@ void loop(void) {
           ;
       }
 */
+      #ifdef __DEBUG__
       Serial.print("CAL,");
       Serial.print(cnt);
       Serial.print(",");
       Serial.print(RA.getAverage()*GAIN, 4);
       Serial.print(",");
       Serial.println(calibgas);
+      #endif
 
       if ( samples == CALIBRATION_NEEDED_SAMPLES ) {
         samples = 0;
@@ -236,14 +241,15 @@ void loop(void) {
       lcd.print(calc_max_operating_depth(pour, 1.6), 1);
       lcd.print("m ");
 
-/*
+      #ifdef __DEBUG__
       Serial.print("MES,");
       Serial.print(cnt);
       Serial.print(",");
       Serial.print(RA.getAverage()*GAIN, 4);
       Serial.print(",");
       Serial.println(pour, 2);
-*/
+      #endif
+
       delay(200);
       break;
   }
