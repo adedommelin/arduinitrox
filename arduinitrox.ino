@@ -48,6 +48,11 @@
 #define keySELECT 4
 #define keyNONE   5
 
+// LCD Screen
+#define LCD_LINEBEGIN 0
+#define LCD_ROW1      0
+#define LCD_ROW2      1
+
 // Gas & Calibration stuff
 #define CALIBRATION_NEEDED_SAMPLES 500
 #define GAIN 0.0078125
@@ -55,10 +60,10 @@ float calibgas = 21;
 
 
 
+
 Adafruit_ADS1115 ads;
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 RunningAverage RA(10);
-
 
 int opmode = MODE_CALIBRATION_AUTO;
 int lcd_key = keyNONE;
@@ -115,7 +120,7 @@ void setup(void) {
   lcd.begin(16, 2);
   lcd.clear();
   lcd.print(PROGRAM_NAME);
-  lcd.setCursor(0, 1);
+  lcd.setCursor(LCD_LINEBEGIN, LCD_ROW2);
   lcd.print(OWNER_MSG);
   delay(5000);
 }
@@ -142,10 +147,10 @@ void loop(void) {
       if ( sig1 < 0.0002 ) {
         samples += 1;
       }
-      lcd.setCursor(0, 0);
+      lcd.setCursor(LCD_LINEBEGIN, LCD_ROW1);
       lcd.print("CALIBRATION AUTO");
 
-      lcd.setCursor(0, 1);
+      lcd.setCursor(LCD_LINEBEGIN, LCD_ROW2);
       lcd.print("%02: ");
       lcd.print(calibgas, 1);
 
@@ -184,11 +189,10 @@ void loop(void) {
 
 
     case MODE_CALIBRATION_MANU:
-      lcd.setCursor(0, 0);
+      lcd.setCursor(LCD_LINEBEGIN, LCD_ROW1);
       lcd.print("CALIBRATION MANU");
-      lcd.setCursor(0, 1);
+      lcd.setCursor(LCD_LINEBEGIN, LCD_ROW2);
       lcd.print("%O2 REF: ");
-      lcd.setCursor(9, 1);
       lcd.print(calibgas, 1);
       lcd.print("         ");
 
@@ -233,7 +237,7 @@ void loop(void) {
         lcd.print("====");
       }
 
-      lcd.setCursor(0, 1);
+      lcd.setCursor(LCD_LINEBEGIN, LCD_ROW2);
       lcd.print("MOD: ");
       lcd.print(calc_max_operating_depth(pour, 1.4), 1);
       lcd.print("m ");
