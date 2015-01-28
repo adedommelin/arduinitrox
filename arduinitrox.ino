@@ -30,7 +30,7 @@
 
 
 /** Define some constants **/
-
+#define __DEBUG__ 1
 // Program name
 #define PROGRAM_NAME "ArduiNitrox v0.1"
 #define OWNER_MSG "Owner : Alex D."
@@ -217,7 +217,7 @@ void loop(void) {
           delay(200);
           break;
 
-        case keySELECT: // Not sure about this one, should be validated when sensor received
+        case keySELECT:
           opmode = MODE_CALIBRATION_AUTO;
           delay(200);
           break;
