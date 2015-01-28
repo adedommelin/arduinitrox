@@ -30,7 +30,7 @@
 
 
 /** Define some constants **/
-#define __DEBUG__ 1
+
 // Program name
 #define PROGRAM_NAME "ArduiNitrox v0.1"
 #define OWNER_MSG "Owner : Alex D."
