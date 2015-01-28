@@ -159,8 +159,7 @@ void loop(void) {
       lcd.print(pour, 0);
       lcd.print("% ");
 
-      if ( (RA.getAverage()*GAIN) < 0.02)
-      {
+      if ( (RA.getAverage()*GAIN) < 0.02) {
         // No data received, giving up :'(
         lcd.setCursor(0, 0);
         lcd.print("SENSOR FAILURE !");
