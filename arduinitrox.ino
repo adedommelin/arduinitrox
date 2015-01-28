@@ -158,7 +158,7 @@ void loop(void) {
       lcd.print(" | ");
       lcd.print(pour, 0);
       lcd.print("% ");
-/*
+
       if ( (RA.getAverage()*GAIN) < 0.02)
       {
         // No data received, giving up :'(
@@ -167,7 +167,7 @@ void loop(void) {
         for(;;)
           ;
       }
-*/
+
       #ifdef __DEBUG__
       Serial.print("CAL,");
       Serial.print(cnt);
